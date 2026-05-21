@@ -1,0 +1,74 @@
+// rbac.prisma — canonical RBAC schema fragment for `@rbac-node/prisma`.
+//
+// Copy the model blocks below into your `schema.prisma`. Keep your existing
+// `datasource` and `generator` blocks — this fragment only defines models.
+//
+// Storage layout is Spatie-compatible (snake_case table & column names via
+// `@@map` / `@map`) while the Prisma client API stays idiomatic camelCase.
+//
+// Pivot tables use a surrogate `id` PK plus a compound `@@unique` covering
+// `(target_id, model_type, model_key)` so subject↔role and subject↔permission
+// grants stay idempotent.
+
+model Permission {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  roles    RoleHasPermission[]
+  subjects ModelHasPermission[]
+
+  @@unique([name], name: "permissions_name_unique")
+  @@map("permissions")
+}
+
+model Role {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  permissions RoleHasPermission[]
+  subjects    ModelHasRole[]
+
+  @@unique([name], name: "roles_name_unique")
+  @@map("roles")
+}
+
+model ModelHasPermission {
+  id           String @id @default(cuid())
+  permissionId String @map("permission_id")
+  modelType    String @map("model_type")
+  modelKey     String @map("model_key")
+
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([permissionId, modelType, modelKey])
+  @@index([modelType, modelKey], name: "model_has_permissions_model_idx")
+  @@map("model_has_permissions")
+}
+
+model ModelHasRole {
+  id        String @id @default(cuid())
+  roleId    String @map("role_id")
+  modelType String @map("model_type")
+  modelKey  String @map("model_key")
+
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, modelType, modelKey])
+  @@index([modelType, modelKey], name: "model_has_roles_model_idx")
+  @@map("model_has_roles")
+}
+
+model RoleHasPermission {
+  roleId       String @map("role_id")
+  permissionId String @map("permission_id")
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_has_permissions")
+}

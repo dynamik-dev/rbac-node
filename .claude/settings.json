@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/chrisarter/.claude/plugins/cache/bully-marketplace/bully/0.8.5/hooks/hook.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

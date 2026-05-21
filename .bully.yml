@@ -1,0 +1,55 @@
+schema_version: 1
+
+skip:
+  - "node_modules/**"
+  - "dist/**"
+  - ".turbo/**"
+  - ".git/**"
+  - "test-fixture/**"
+  - "packages/prisma/test-fixture/**"
+  - "migrations/**"
+  - "pnpm-lock.yaml"
+
+rules:
+  biome-check:
+    description: >
+      Code must pass biome lint and format. Biome is the lawmaker — bully
+      enforces "pass biome" on every Edit/Write. Rule definitions live in
+      biome.json; this passthrough just runs the check.
+    engine: script
+    scope: ["*.ts", "*.tsx", "*.js", "*.cjs", "*.mjs", "*.json"]
+    severity: error
+    script: "./node_modules/.bin/biome check --reporter=summary {file}"
+
+  depcruise-architecture:
+    description: >
+      Dependency-cruiser enforces clean domain boundaries: core is the
+      foundation, drivers and adapters may only depend on core (never on
+      each other), core/src/internal/ is private, no circular deps. Rules
+      live in .dependency-cruiser.cjs.
+    engine: script
+    scope: ["*.ts", "*.tsx", "*.js", "*.cjs", "*.mjs"]
+    severity: error
+    script: "./node_modules/.bin/depcruise --no-progress {file}"
+
+  no-ts-ignore:
+    description: >
+      Do not use `@ts-ignore`. Prefer `@ts-expect-error` with a short
+      comment so the suppression fails loudly once the underlying issue
+      is fixed. Fix the type error instead when possible.
+    engine: script
+    scope: ["*.ts", "*.tsx"]
+    severity: error
+    script: "grep -nE '@ts-ignore' {file} && exit 1 || exit 0"
+
+  no-guards-or-teams-regression:
+    description: >
+      The package surface was deliberately cut to drop guards and teams.
+      Do not reintroduce guardName, teamId, defaultGuard, or TeamsOption.
+      Multi-tenancy and auth-context scoping belong above this library —
+      callers namespace role names (e.g. "tenant42:admin") or wrap the
+      API in their own scoped client.
+    engine: script
+    scope: ["*.ts", "*.tsx"]
+    severity: error
+    script: "grep -nE '(guardName|teamId|defaultGuard|TeamsOption)' {file} && exit 1 || exit 0"

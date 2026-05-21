@@ -1,0 +1,41 @@
+{
+  "name": "rbac-node",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Type-safe RBAC for Node — feature parity with spatie/laravel-permission",
+  "license": "MIT",
+  "author": "Chris Arter <chris@arter.dev>",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@10.24.0",
+  "scripts": {
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "lint": "pnpm lint:fmt && pnpm lint:js && pnpm lint:deps",
+    "lint:fmt": "biome format .",
+    "lint:js": "biome lint .",
+    "lint:deps": "depcruise packages",
+    "fix": "biome check --write .",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.15",
+    "@changesets/cli": "^2.27.10",
+    "@types/node": "^22.10.5",
+    "dependency-cruiser": "^17.4.0",
+    "turbo": "^2.3.4",
+    "typescript": "^5.7.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "better-sqlite3",
+      "esbuild",
+      "prisma"
+    ]
+  }
+}
