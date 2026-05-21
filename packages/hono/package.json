@@ -1,7 +1,7 @@
 {
-  "name": "@rbac-node/hono",
+  "name": "@rbac-ts/hono",
   "version": "0.0.1",
-  "description": "Hono middleware adapter for @rbac-node/core.",
+  "description": "Hono middleware adapter for @rbac-ts/core.",
   "license": "MIT",
   "author": "Chris Arter <chris@arter.dev>",
   "type": "module",
@@ -25,11 +25,12 @@
     "build": "tsc -p tsconfig.build.json",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "@rbac-node/core": "workspace:*"
+    "@rbac-ts/core": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
@@ -37,6 +38,7 @@
     "vitest": "^2.1.8"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   }
 }

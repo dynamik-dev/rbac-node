@@ -8,7 +8,7 @@ export type LruCacheOptions = {
   ttlSeconds?: number | undefined;
 };
 
-// lru-cache's value type must extend `{}` (non-nullish). All rbac-node cache
+// lru-cache's value type must extend `{}` (non-nullish). All rbac-ts cache
 // entries are arrays or objects, so `object` is the right constraint here.
 type LruValue = object;
 

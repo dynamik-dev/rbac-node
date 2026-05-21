@@ -1,4 +1,4 @@
-import { InMemoryDriver, Rbac, type Subject } from '@rbac-node/core';
+import { InMemoryDriver, Rbac, type Subject } from '@rbac-ts/core';
 import { describe, expect, it } from 'vitest';
 
 import { factory } from './index.js';
@@ -15,7 +15,7 @@ function makeCtx(): { request: unknown; status?: number; body?: unknown } {
   return { request: {} };
 }
 
-describe('@rbac-node/koa factory', () => {
+describe('@rbac-ts/koa factory', () => {
   it('calls next when subject has the role', async () => {
     const rbac = makeRbac();
     await rbac.roles.create({ name: 'admin' });

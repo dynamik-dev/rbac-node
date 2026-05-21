@@ -1,11 +1,11 @@
-# @rbac-node/koa
+# @rbac-ts/koa
 
-Koa middleware adapter for [`@rbac-node/core`](https://www.npmjs.com/package/@rbac-node/core).
+Koa middleware adapter for [`@rbac-ts/core`](https://www.npmjs.com/package/@rbac-ts/core).
 
 ## Install
 
 ```sh
-pnpm add @rbac-node/core @rbac-node/koa
+pnpm add @rbac-ts/core @rbac-ts/koa
 ```
 
 ## Quickstart
@@ -13,8 +13,8 @@ pnpm add @rbac-node/core @rbac-node/koa
 ```ts
 import Koa from 'koa';
 import Router from '@koa/router';
-import { Rbac } from '@rbac-node/core';
-import { factory } from '@rbac-node/koa';
+import { Rbac } from '@rbac-ts/core';
+import { factory } from '@rbac-ts/koa';
 
 const rbac = new Rbac({ /* driver, defaultGuard */ });
 

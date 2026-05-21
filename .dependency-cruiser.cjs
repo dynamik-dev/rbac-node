@@ -1,5 +1,5 @@
 /**
- * Architecture rules for the rbac-node monorepo.
+ * Architecture rules for the rbac-ts monorepo.
  *
  * Tiers:
  *   - `core`        — foundation, no workspace deps
@@ -17,7 +17,7 @@ const packageBoundaryRules = packages.map((pkg) => {
       name: 'core-is-foundation',
       severity: 'error',
       comment:
-        '@rbac-node/core is the foundation — it must not depend on other workspace packages.',
+        '@rbac-ts/core is the foundation — it must not depend on other workspace packages.',
       from: { path: '^packages/core/src' },
       to: { path: '^packages/(?!core/)[^/]+/src' },
     };
@@ -25,7 +25,7 @@ const packageBoundaryRules = packages.map((pkg) => {
   return {
     name: `${pkg}-only-imports-core`,
     severity: 'error',
-    comment: `@rbac-node/${pkg} may only import from @rbac-node/core. Drivers and adapters must not depend on each other.`,
+    comment: `@rbac-ts/${pkg} may only import from @rbac-ts/core. Drivers and adapters must not depend on each other.`,
     from: { path: `^packages/${pkg}/src` },
     to: { path: `^packages/(?!core/|${pkg}/)[^/]+/src` },
   };
@@ -39,7 +39,7 @@ module.exports = {
       name: 'no-imports-into-core-internal',
       severity: 'error',
       comment:
-        'packages/core/src/internal/** is a private implementation detail of @rbac-node/core. Use the public exports.',
+        'packages/core/src/internal/** is a private implementation detail of @rbac-ts/core. Use the public exports.',
       from: { path: '^packages/(?!core/)' },
       to: { path: '^packages/core/src/internal/' },
     },
@@ -74,7 +74,7 @@ module.exports = {
           '\\.d\\.ts$',
           '^\\.dependency-cruiser\\.cjs$',
           '^biome\\.json$',
-          // Sub-path public exports (e.g. @rbac-node/drizzle/schema/postgres).
+          // Sub-path public exports (e.g. @rbac-ts/drizzle/schema/postgres).
           // Dep-cruiser doesn't read package.json `exports`, so these look
           // orphan from the file graph but are intentional entry points.
           '^packages/[^/]+/src/schema/[^/]+\\.ts$',
@@ -88,7 +88,13 @@ module.exports = {
       path: 'node_modules',
     },
     exclude: {
-      path: ['(^|/)node_modules/', '(^|/)dist/', '(^|/)\\.turbo/', '(^|/)test-fixture/'],
+      path: [
+        '(^|/)node_modules/',
+        '(^|/)dist/',
+        '(^|/)\\.turbo/',
+        '(^|/)coverage/',
+        '(^|/)test-fixture/',
+      ],
     },
     tsPreCompilationDeps: true,
     tsConfig: { fileName: 'tsconfig.base.json' },

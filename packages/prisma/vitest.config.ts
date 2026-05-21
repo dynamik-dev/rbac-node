@@ -7,7 +7,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const coreSrc = path.resolve(here, '..', 'core', 'src');
 
 export default defineConfig({
-  // Resolve `@rbac-node/core` and `@rbac-node/core/testing` to the source
+  // Resolve `@rbac-ts/core` and `@rbac-ts/core/testing` to the source
   // tree, not the dist bundle. The dist bundle for `testing/` inlines
   // `vitest` (tsup doesn't externalize it by default), which gives us a
   // *second* vitest instance whose suite registrations never reach the
@@ -19,11 +19,11 @@ export default defineConfig({
   resolve: {
     alias: [
       {
-        find: /^@rbac-node\/core\/testing$/,
+        find: /^@rbac-ts\/core\/testing$/,
         replacement: path.join(coreSrc, 'testing', 'index.ts'),
       },
       {
-        find: /^@rbac-node\/core$/,
+        find: /^@rbac-ts\/core$/,
         replacement: path.join(coreSrc, 'index.ts'),
       },
     ],
@@ -33,5 +33,18 @@ export default defineConfig({
     environment: 'node',
     pool: 'forks',
     poolOptions: { forks: { singleFork: true } },
+    coverage: {
+      provider: 'v8',
+      reporter: ['text-summary', 'json-summary', 'html'],
+      include: ['src/**/*.ts'],
+      exclude: ['src/**/*.test.ts', 'src/**/*.spec.ts'],
+      thresholds: {
+        autoUpdate: true,
+        lines: 82.48,
+        statements: 82.48,
+        functions: 87.09,
+        branches: 85.55,
+      },
+    },
   },
 });

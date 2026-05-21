@@ -1,4 +1,4 @@
-import { InMemoryDriver, Rbac, type Subject } from '@rbac-node/core';
+import { InMemoryDriver, Rbac, type Subject } from '@rbac-ts/core';
 import { describe, expect, it } from 'vitest';
 
 import { factory } from './index.js';
@@ -37,7 +37,7 @@ function makeResponse() {
   };
 }
 
-describe('@rbac-node/express factory', () => {
+describe('@rbac-ts/express factory', () => {
   it('calls next when subject has the role', async () => {
     const rbac = makeRbac();
     await rbac.roles.create({ name: 'admin' });

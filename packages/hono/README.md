@@ -1,11 +1,11 @@
-# @rbac-node/hono
+# @rbac-ts/hono
 
-Hono middleware adapter for [`@rbac-node/core`](https://www.npmjs.com/package/@rbac-node/core).
+Hono middleware adapter for [`@rbac-ts/core`](https://www.npmjs.com/package/@rbac-ts/core).
 
 ## Install
 
 ```sh
-pnpm add @rbac-node/core @rbac-node/hono
+pnpm add @rbac-ts/core @rbac-ts/hono
 ```
 
 `hono` itself is your dependency — the adapter works against any `Context`.
@@ -14,8 +14,8 @@ pnpm add @rbac-node/core @rbac-node/hono
 
 ```ts
 import { Hono } from 'hono';
-import { Rbac } from '@rbac-node/core';
-import { factory } from '@rbac-node/hono';
+import { Rbac } from '@rbac-ts/core';
+import { factory } from '@rbac-ts/hono';
 
 const rbac = new Rbac({ /* driver, defaultGuard */ });
 

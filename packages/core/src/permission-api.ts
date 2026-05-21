@@ -14,6 +14,16 @@ export class PermissionApi<P extends string = string> {
     return this.ctx.driver.createPermission(fullInput);
   }
 
+  /**
+   * Bulk, idempotent creation. Returns one permission per unique input name,
+   * creating missing ones in a single round trip. Safe to call repeatedly
+   * with overlapping sets — useful for seeders, migrations, and tests.
+   */
+  async createMany(names: ReadonlyArray<P>): Promise<Permission[]> {
+    if (names.length === 0) return [];
+    return this.ctx.driver.createPermissions(names);
+  }
+
   async findByName(name: P): Promise<Permission | null> {
     return this.ctx.driver.findPermissionByName(name);
   }

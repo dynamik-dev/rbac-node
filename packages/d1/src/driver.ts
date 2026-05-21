@@ -13,7 +13,7 @@ import {
   type Subject,
   toPermissionId,
   toRoleId,
-} from '@rbac-node/core';
+} from '@rbac-ts/core';
 
 // ─── Structural D1 binding types ────────────────────────────────────────────
 //
@@ -111,6 +111,52 @@ export class D1Driver implements RbacDriver {
     };
   }
 
+  async createPermissions(names: ReadonlyArray<string>): Promise<Permission[]> {
+    const unique = Array.from(new Set(names));
+    if (unique.length === 0) return [];
+
+    const placeholders = unique.map(() => '?').join(',');
+    const existingResult = await this.db
+      .prepare(
+        `SELECT id, name, created_at, updated_at FROM permissions WHERE name IN (${placeholders})`,
+      )
+      .bind(...unique)
+      .all<PermissionRow>();
+    const existing = existingResult.results ?? [];
+    const existingByName = new Map(existing.map((row) => [row.name, row]));
+
+    const missing = unique.filter((name) => !existingByName.has(name));
+    if (missing.length > 0) {
+      const now = Date.now();
+      const stmts = missing.map((name) =>
+        this.db
+          .prepare(
+            'INSERT INTO permissions (id, name, created_at, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(name) DO NOTHING',
+          )
+          .bind(this.idGen(), name, now, now),
+      );
+      await this.db.batch(stmts);
+
+      const insertedPlaceholders = missing.map(() => '?').join(',');
+      const insertedResult = await this.db
+        .prepare(
+          `SELECT id, name, created_at, updated_at FROM permissions WHERE name IN (${insertedPlaceholders})`,
+        )
+        .bind(...missing)
+        .all<PermissionRow>();
+      for (const row of insertedResult.results ?? []) {
+        existingByName.set(row.name, row);
+      }
+    }
+
+    const out: Permission[] = [];
+    for (const name of unique) {
+      const row = existingByName.get(name);
+      if (row) out.push(rowToPermission(row));
+    }
+    return out;
+  }
+
   async findPermissionByName(name: string): Promise<Permission | null> {
     const row = await this.db
       .prepare('SELECT id, name, created_at, updated_at FROM permissions WHERE name = ?')
@@ -167,6 +213,50 @@ export class D1Driver implements RbacDriver {
       createdAt: new Date(now),
       updatedAt: new Date(now),
     };
+  }
+
+  async createRoles(names: ReadonlyArray<string>): Promise<Role[]> {
+    const unique = Array.from(new Set(names));
+    if (unique.length === 0) return [];
+
+    const placeholders = unique.map(() => '?').join(',');
+    const existingResult = await this.db
+      .prepare(`SELECT id, name, created_at, updated_at FROM roles WHERE name IN (${placeholders})`)
+      .bind(...unique)
+      .all<RoleRow>();
+    const existing = existingResult.results ?? [];
+    const existingByName = new Map(existing.map((row) => [row.name, row]));
+
+    const missing = unique.filter((name) => !existingByName.has(name));
+    if (missing.length > 0) {
+      const now = Date.now();
+      const stmts = missing.map((name) =>
+        this.db
+          .prepare(
+            'INSERT INTO roles (id, name, created_at, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(name) DO NOTHING',
+          )
+          .bind(this.idGen(), name, now, now),
+      );
+      await this.db.batch(stmts);
+
+      const insertedPlaceholders = missing.map(() => '?').join(',');
+      const insertedResult = await this.db
+        .prepare(
+          `SELECT id, name, created_at, updated_at FROM roles WHERE name IN (${insertedPlaceholders})`,
+        )
+        .bind(...missing)
+        .all<RoleRow>();
+      for (const row of insertedResult.results ?? []) {
+        existingByName.set(row.name, row);
+      }
+    }
+
+    const out: Role[] = [];
+    for (const name of unique) {
+      const row = existingByName.get(name);
+      if (row) out.push(rowToRole(row));
+    }
+    return out;
   }
 
   async findRoleByName(name: string): Promise<Role | null> {

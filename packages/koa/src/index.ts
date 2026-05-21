@@ -5,7 +5,7 @@ import {
   type RbacLexicon,
   type RoleName,
   type Subject,
-} from '@rbac-node/core';
+} from '@rbac-ts/core';
 
 type Awaitable<T> = T | Promise<T>;
 

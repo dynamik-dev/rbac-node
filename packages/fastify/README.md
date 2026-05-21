@@ -1,19 +1,19 @@
-# @rbac-node/fastify
+# @rbac-ts/fastify
 
-Fastify `preHandler` adapter for [`@rbac-node/core`](https://www.npmjs.com/package/@rbac-node/core).
+Fastify `preHandler` adapter for [`@rbac-ts/core`](https://www.npmjs.com/package/@rbac-ts/core).
 
 ## Install
 
 ```sh
-pnpm add @rbac-node/core @rbac-node/fastify
+pnpm add @rbac-ts/core @rbac-ts/fastify
 ```
 
 ## Quickstart
 
 ```ts
 import Fastify from 'fastify';
-import { Rbac } from '@rbac-node/core';
-import { factory } from '@rbac-node/fastify';
+import { Rbac } from '@rbac-ts/core';
+import { factory } from '@rbac-ts/fastify';
 
 const rbac = new Rbac({ /* driver, defaultGuard */ });
 

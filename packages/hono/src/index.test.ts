@@ -1,4 +1,4 @@
-import { InMemoryDriver, Rbac, type Subject } from '@rbac-node/core';
+import { InMemoryDriver, Rbac, type Subject } from '@rbac-ts/core';
 import { describe, expect, it } from 'vitest';
 
 import { factory } from './index.js';
@@ -34,7 +34,7 @@ function makeContext() {
   };
 }
 
-describe('@rbac-node/hono factory', () => {
+describe('@rbac-ts/hono factory', () => {
   it('calls next when subject has the required role', async () => {
     const rbac = makeRbac();
     await rbac.roles.create({ name: 'admin' });

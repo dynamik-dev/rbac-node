@@ -1,0 +1,24 @@
+# Pre-commit gates mirror the CI jobs in .github/workflows/ci.yml.
+# Goal: surface the same failures locally in seconds so contributors get
+# fast feedback instead of waiting on the CI round-trip.
+
+pre-commit:
+  parallel: true
+  jobs:
+    - name: biome
+      glob: "*.{ts,tsx,js,jsx,json,jsonc}"
+      run: pnpm exec biome check --write --no-errors-on-unmatched {staged_files}
+      stage_fixed: true
+
+    - name: typecheck
+      glob: "packages/**/*.ts"
+      run: pnpm -r --parallel exec tsc --noEmit
+
+    - name: depcruise
+      glob: "packages/*/src/**/*.ts"
+      run: pnpm lint:deps
+
+commit-msg:
+  jobs:
+    - name: non-empty
+      run: test -s {1}

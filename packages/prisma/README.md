@@ -1,15 +1,15 @@
-# @rbac-node/prisma
+# @rbac-ts/prisma
 
-Prisma driver for [`@rbac-node/core`](../core). Spatie-compatible RBAC tables
+Prisma driver for [`@rbac-ts/core`](../core). Spatie-compatible RBAC tables
 (snake_case storage, camelCase Prisma client API), atomic syncs, idempotent
 grants.
 
 ## Install
 
 ```sh
-pnpm add @rbac-node/core @rbac-node/prisma
+pnpm add @rbac-ts/core @rbac-ts/prisma
 # or
-npm install @rbac-node/core @rbac-node/prisma
+npm install @rbac-ts/core @rbac-ts/prisma
 ```
 
 `@prisma/client` is a peer dependency — bring your own.
@@ -19,7 +19,7 @@ npm install @rbac-node/core @rbac-node/prisma
 ### 1. Drop in the schema fragment
 
 ```sh
-npx rbac-node-prisma init
+npx rbac-ts-prisma init
 ```
 
 This writes `prisma/rbac.prisma` to your project. Open it, copy the model
@@ -39,8 +39,8 @@ models.
 
 ```ts
 import { PrismaClient } from '@prisma/client';
-import { Rbac } from '@rbac-node/core';
-import { PrismaDriver } from '@rbac-node/prisma';
+import { Rbac } from '@rbac-ts/core';
+import { PrismaDriver } from '@rbac-ts/prisma';
 
 const prisma = new PrismaClient();
 const rbac = new Rbac({

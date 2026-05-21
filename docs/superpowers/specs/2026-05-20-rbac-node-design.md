@@ -1,4 +1,4 @@
-# rbac-node — Design
+# rbac-ts — Design
 
 **Date:** 2026-05-20
 **Author:** chris@arter.dev
@@ -23,9 +23,9 @@ A type-safe, framework-agnostic, driver-pluggable RBAC library for Node/TypeScri
 ## Repository layout (pnpm workspaces)
 
 ```
-rbac-node/
+rbac-ts/
 ├── packages/
-│   ├── core/          # @rbac-node/core
+│   ├── core/          # @rbac-ts/core
 │   │   ├── src/
 │   │   │   ├── index.ts                  # public exports
 │   │   │   ├── types.ts                  # Subject, Permission, Role, IDs
@@ -51,14 +51,14 @@ rbac-node/
 │   │   ├── package.json
 │   │   ├── tsconfig.json
 │   │   └── tsup.config.ts
-│   ├── prisma/        # @rbac-node/prisma
+│   ├── prisma/        # @rbac-ts/prisma
 │   │   ├── src/
 │   │   │   ├── index.ts
 │   │   │   ├── driver.ts                 # PrismaDriver
-│   │   │   └── cli.ts                    # `rbac-node-prisma init`
+│   │   │   └── cli.ts                    # `rbac-ts-prisma init`
 │   │   ├── prisma/rbac.prisma            # canonical schema fragment
 │   │   └── package.json
-│   └── drizzle/       # @rbac-node/drizzle
+│   └── drizzle/       # @rbac-ts/drizzle
 │       ├── src/
 │       │   ├── index.ts
 │       │   ├── driver.ts                 # DrizzleDriver
@@ -121,8 +121,8 @@ type Role = {
 ### Constructing Rbac (generic, typed)
 
 ```ts
-import { Rbac } from '@rbac-node/core';
-import { PrismaDriver } from '@rbac-node/prisma';
+import { Rbac } from '@rbac-ts/core';
+import { PrismaDriver } from '@rbac-ts/prisma';
 
 type AppPerms =
   | 'articles.create' | 'articles.edit' | 'articles.delete'
@@ -219,7 +219,7 @@ Enabled via `teams: { enabled: true }`. Adds nullable `team_id` to `roles`, `mod
 **Team context** uses Node's `AsyncLocalStorage`:
 
 ```ts
-import { runWithTeam } from '@rbac-node/core';
+import { runWithTeam } from '@rbac-ts/core';
 
 await runWithTeam(team.id, async () => {
   // Any rbac.for(...) call inside this scope automatically uses team.id
@@ -278,10 +278,10 @@ class UnauthorizedError extends RbacError {}
 
 ## Framework middleware
 
-Side exports of `@rbac-node/core/middleware/{express,fastify,hono,koa}`. Each adapter takes an `Rbac` instance and a `subject` resolver:
+Side exports of `@rbac-ts/core/middleware/{express,fastify,hono,koa}`. Each adapter takes an `Rbac` instance and a `subject` resolver:
 
 ```ts
-import { express as rbacExpress } from '@rbac-node/core/middleware';
+import { express as rbacExpress } from '@rbac-ts/core/middleware';
 
 const auth = rbacExpress.factory(rbac, {
   resolveSubject: req => ({ type: 'User', key: String(req.user!.id) }),
@@ -307,32 +307,32 @@ Hono/Fastify/Koa equivalents have the same shape.
 
 `model_key` is `varchar(255)` (MySQL/Postgres) or `text` (SQLite/Postgres) — accommodates int, bigint, uuid, ulid. IDs on `permissions`/`roles` are driver-determined (Prisma `cuid()`, Drizzle `uuid` or autoinc).
 
-## Driver: `@rbac-node/prisma`
+## Driver: `@rbac-ts/prisma`
 
 Ships `prisma/rbac.prisma` with canonical models. Users either:
-1. Run `npx @rbac-node/prisma init` to copy/merge into their `schema.prisma`, **or**
+1. Run `npx @rbac-ts/prisma init` to copy/merge into their `schema.prisma`, **or**
 2. Copy/paste the fragment manually.
 
 ```ts
 import { PrismaClient } from '@prisma/client';
-import { PrismaDriver } from '@rbac-node/prisma';
+import { PrismaDriver } from '@rbac-ts/prisma';
 const driver = new PrismaDriver(new PrismaClient(), { teams: true });
 ```
 
 Edge writes use `$transaction` for atomicity. Optional `tableNames` config to override defaults if users have collisions.
 
-## Driver: `@rbac-node/drizzle`
+## Driver: `@rbac-ts/drizzle`
 
 Ships `schema/{postgres,mysql,sqlite}.ts`. Users import and spread:
 
 ```ts
 import { drizzle } from 'drizzle-orm/node-postgres';
-import { defineRbacSchema } from '@rbac-node/drizzle/schema/postgres';
+import { defineRbacSchema } from '@rbac-ts/drizzle/schema/postgres';
 
 const rbacTables = defineRbacSchema({ teams: true });
 export const schema = { ...rbacTables, ...myTables };
 
-import { DrizzleDriver } from '@rbac-node/drizzle';
+import { DrizzleDriver } from '@rbac-ts/drizzle';
 const db = drizzle(pool, { schema });
 const driver = new DrizzleDriver(db, rbacTables);
 ```
@@ -341,7 +341,7 @@ Uses Drizzle's typed relational queries; no string SQL.
 
 ## Driver contract (`RbacDriver`)
 
-22 atomic methods. Every driver must pass the conformance suite in `@rbac-node/core/testing`. Sketch:
+22 atomic methods. Every driver must pass the conformance suite in `@rbac-ts/core/testing`. Sketch:
 
 ```ts
 interface RbacDriver {
@@ -386,7 +386,7 @@ interface RbacDriver {
 ## Testing
 
 - Each package uses `vitest`.
-- `@rbac-node/core/testing` exports `runConformanceSuite(driverFactory)` — every driver runs it.
+- `@rbac-ts/core/testing` exports `runConformanceSuite(driverFactory)` — every driver runs it.
 - `core` runs it against its in-memory driver.
 - `prisma` runs it against SQLite (file:test.db).
 - `drizzle` runs it against `better-sqlite3` (fast) and `pglite` (Postgres semantics).

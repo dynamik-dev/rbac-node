@@ -33,7 +33,7 @@ export type RbacOptions = {
 };
 
 /**
- * Entry point for the rbac-node API.
+ * Entry point for the rbac-ts API.
  *
  * `L` is an optional lexicon — typed string unions for your application's
  * permission and role names. When provided, method inputs are statically

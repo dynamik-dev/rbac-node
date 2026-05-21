@@ -1,13 +1,13 @@
-# @rbac-node/d1
+# @rbac-ts/d1
 
-Cloudflare D1 driver for [`@rbac-node/core`](https://www.npmjs.com/package/@rbac-node/core).
+Cloudflare D1 driver for [`@rbac-ts/core`](https://www.npmjs.com/package/@rbac-ts/core).
 
 Targets the Workers runtime — no ORM, no Node-only dependencies. Just the D1 binding API.
 
 ## Install
 
 ```sh
-pnpm add @rbac-node/core @rbac-node/d1
+pnpm add @rbac-ts/core @rbac-ts/d1
 ```
 
 ## Apply the schema
@@ -17,7 +17,7 @@ This package ships a migration file at `migrations/0001_init.sql`. With Wrangler
 ```sh
 # Copy or symlink to your project's migrations dir
 mkdir -p migrations
-cp node_modules/@rbac-node/d1/migrations/0001_init.sql migrations/
+cp node_modules/@rbac-ts/d1/migrations/0001_init.sql migrations/
 
 wrangler d1 migrations apply <YOUR_DATABASE>
 ```
@@ -25,15 +25,15 @@ wrangler d1 migrations apply <YOUR_DATABASE>
 Or apply once at runtime with the bundled DDL:
 
 ```ts
-import { SCHEMA_SQL } from '@rbac-node/d1/schema';
+import { SCHEMA_SQL } from '@rbac-ts/d1/schema';
 await env.DB.exec(SCHEMA_SQL);
 ```
 
 ## Quickstart
 
 ```ts
-import { Rbac } from '@rbac-node/core';
-import { D1Driver } from '@rbac-node/d1';
+import { Rbac } from '@rbac-ts/core';
+import { D1Driver } from '@rbac-ts/d1';
 
 type Env = { DB: D1Database };
 

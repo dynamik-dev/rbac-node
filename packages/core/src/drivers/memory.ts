@@ -50,6 +50,35 @@ export class InMemoryDriver implements RbacDriver {
     return permission;
   }
 
+  async createPermissions(names: ReadonlyArray<string>): Promise<Permission[]> {
+    const unique: string[] = [];
+    const seen = new Set<string>();
+    for (const n of names) {
+      if (!seen.has(n)) {
+        seen.add(n);
+        unique.push(n);
+      }
+    }
+    const out: Permission[] = [];
+    for (const name of unique) {
+      const existing = await this.findPermissionByName(name);
+      if (existing) {
+        out.push(existing);
+        continue;
+      }
+      const now = new Date();
+      const permission: Permission = {
+        id: toPermissionId(randomUUID()),
+        name,
+        createdAt: now,
+        updatedAt: now,
+      };
+      this.permissionsById.set(permission.id, permission);
+      out.push(permission);
+    }
+    return out;
+  }
+
   async findPermissionByName(name: string): Promise<Permission | null> {
     for (const p of this.permissionsById.values()) {
       if (p.name === name) return p;
@@ -96,6 +125,35 @@ export class InMemoryDriver implements RbacDriver {
     };
     this.rolesById.set(role.id, role);
     return role;
+  }
+
+  async createRoles(names: ReadonlyArray<string>): Promise<Role[]> {
+    const unique: string[] = [];
+    const seen = new Set<string>();
+    for (const n of names) {
+      if (!seen.has(n)) {
+        seen.add(n);
+        unique.push(n);
+      }
+    }
+    const out: Role[] = [];
+    for (const name of unique) {
+      const existing = await this.findRoleByName(name);
+      if (existing) {
+        out.push(existing);
+        continue;
+      }
+      const now = new Date();
+      const role: Role = {
+        id: toRoleId(randomUUID()),
+        name,
+        createdAt: now,
+        updatedAt: now,
+      };
+      this.rolesById.set(role.id, role);
+      out.push(role);
+    }
+    return out;
   }
 
   async findRoleByName(name: string): Promise<Role | null> {

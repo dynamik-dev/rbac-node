@@ -1,7 +1,7 @@
 {
-  "name": "@rbac-node/prisma",
+  "name": "@rbac-ts/prisma",
   "version": "0.0.1",
-  "description": "Prisma driver for @rbac-node/core.",
+  "description": "Prisma driver for @rbac-ts/core.",
   "license": "MIT",
   "author": "Chris Arter <chris@arter.dev>",
   "type": "module",
@@ -14,7 +14,7 @@
     }
   },
   "bin": {
-    "rbac-node-prisma": "./dist/cli.js"
+    "rbac-ts-prisma": "./dist/cli.js"
   },
   "files": [
     "dist",
@@ -29,11 +29,12 @@
     "build": "tsc -p tsconfig.build.json",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "@rbac-node/core": "workspace:*"
+    "@rbac-ts/core": "workspace:*"
   },
   "peerDependencies": {
     "@prisma/client": ">=5"
@@ -46,6 +47,7 @@
     "vitest": "^2.1.8"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   }
 }

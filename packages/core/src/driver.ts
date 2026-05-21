@@ -32,6 +32,15 @@ export interface RbacDriver {
 
   createPermission(input: CreatePermissionInput): Promise<Permission>;
 
+  /**
+   * Bulk, idempotent permission creation. Input is deduplicated by name; any
+   * names that already exist are returned unchanged alongside newly-created
+   * rows. Drivers should resolve this in a single transaction.
+   *
+   * Returned order matches the deduplicated input order.
+   */
+  createPermissions(names: ReadonlyArray<string>): Promise<Permission[]>;
+
   findPermissionByName(name: string): Promise<Permission | null>;
 
   findPermissionById(id: PermissionId): Promise<Permission | null>;
@@ -43,6 +52,15 @@ export interface RbacDriver {
   // ─── Roles ────────────────────────────────────────────────────────────────
 
   createRole(input: CreateRoleInput): Promise<Role>;
+
+  /**
+   * Bulk, idempotent role creation. Input is deduplicated by name; any
+   * names that already exist are returned unchanged alongside newly-created
+   * rows. Drivers should resolve this in a single transaction.
+   *
+   * Returned order matches the deduplicated input order.
+   */
+  createRoles(names: ReadonlyArray<string>): Promise<Role[]>;
 
   findRoleByName(name: string): Promise<Role | null>;
 

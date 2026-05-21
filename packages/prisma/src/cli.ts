@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 /**
- * `rbac-node-prisma` — tiny CLI for bootstrapping the schema fragment.
+ * `rbac-ts-prisma` — tiny CLI for bootstrapping the schema fragment.
  *
  * Usage:
- *   npx rbac-node-prisma init
+ *   npx rbac-ts-prisma init
  *
  * Copies this package's `prisma/rbac.prisma` to `<cwd>/prisma/rbac.prisma`
  * so the user can paste the model blocks into their `schema.prisma`.
@@ -41,7 +41,7 @@ async function main(): Promise<void> {
   } catch {
     console.error(
       `Could not locate the bundled rbac.prisma fragment at ${fragmentPath}.\n` +
-        'Reinstall @rbac-node/prisma or report this as a bug.',
+        'Reinstall @rbac-ts/prisma or report this as a bug.',
     );
     process.exit(1);
   }
@@ -68,13 +68,13 @@ async function main(): Promise<void> {
   console.log('  2. Run `prisma migrate dev --name rbac` (or `prisma db push` for SQLite/dev).');
   console.log('  3. Run `prisma generate` so the client picks up the new models.');
   console.log('  4. Instantiate the driver:');
-  console.log("       import { PrismaDriver } from '@rbac-node/prisma';");
-  console.log("       import { Rbac } from '@rbac-node/core';");
+  console.log("       import { PrismaDriver } from '@rbac-ts/prisma';");
+  console.log("       import { Rbac } from '@rbac-ts/core';");
   console.log('       const rbac = new Rbac({ driver: new PrismaDriver(prisma) });');
 }
 
 function printUsage(): void {
-  console.error('Usage: rbac-node-prisma init');
+  console.error('Usage: rbac-ts-prisma init');
   console.error('');
   console.error('Commands:');
   console.error('  init    Copy `prisma/rbac.prisma` into the current project.');

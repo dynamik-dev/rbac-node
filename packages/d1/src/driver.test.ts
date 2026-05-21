@@ -1,4 +1,4 @@
-import { runConformanceSuite } from '@rbac-node/core/testing';
+import { runConformanceSuite } from '@rbac-ts/core/testing';
 import Database from 'better-sqlite3';
 
 import { type D1Database, D1Driver, type D1PreparedStatement, type D1Result } from './driver.js';

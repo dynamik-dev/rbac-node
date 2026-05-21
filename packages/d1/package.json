@@ -1,7 +1,7 @@
 {
-  "name": "@rbac-node/d1",
+  "name": "@rbac-ts/d1",
   "version": "0.0.1",
-  "description": "Cloudflare D1 driver for @rbac-node/core. Targets the Workers runtime.",
+  "description": "Cloudflare D1 driver for @rbac-ts/core. Targets the Workers runtime.",
   "license": "MIT",
   "author": "Chris Arter <chris@arter.dev>",
   "type": "module",
@@ -30,11 +30,12 @@
     "build": "tsc -p tsconfig.build.json",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "@rbac-node/core": "workspace:*"
+    "@rbac-ts/core": "workspace:*"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.12",
@@ -44,6 +45,7 @@
     "vitest": "^2.1.8"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   }
 }

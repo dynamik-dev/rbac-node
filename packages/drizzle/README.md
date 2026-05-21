@@ -1,6 +1,6 @@
-# @rbac-node/drizzle
+# @rbac-ts/drizzle
 
-Drizzle ORM driver for [`@rbac-node/core`](https://www.npmjs.com/package/@rbac-node/core).
+Drizzle ORM driver for [`@rbac-ts/core`](https://www.npmjs.com/package/@rbac-ts/core).
 
 Ships dialect-specific schemas for **Postgres**, **MySQL**, and **SQLite**. A single
 `DrizzleDriver` class implements the `RbacDriver` contract against any of them.
@@ -8,7 +8,7 @@ Ships dialect-specific schemas for **Postgres**, **MySQL**, and **SQLite**. A si
 ## Install
 
 ```sh
-pnpm add @rbac-node/core @rbac-node/drizzle drizzle-orm
+pnpm add @rbac-ts/core @rbac-ts/drizzle drizzle-orm
 ```
 
 You also need a Drizzle-compatible client for your dialect (e.g. `pg`,
@@ -21,9 +21,9 @@ You also need a Drizzle-compatible client for your dialect (e.g. `pg`,
 ```ts
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
-import { Rbac } from '@rbac-node/core';
-import { DrizzleDriver } from '@rbac-node/drizzle';
-import { defineRbacSchema } from '@rbac-node/drizzle/schema/postgres';
+import { Rbac } from '@rbac-ts/core';
+import { DrizzleDriver } from '@rbac-ts/drizzle';
+import { defineRbacSchema } from '@rbac-ts/drizzle/schema/postgres';
 
 // 1. Compose the RBAC tables into your own schema.
 const rbac = defineRbacSchema();
@@ -43,8 +43,8 @@ const rbacApi = new Rbac({ driver, defaultGuard: 'web' });
 ```ts
 import { drizzle } from 'drizzle-orm/mysql2';
 import mysql from 'mysql2/promise';
-import { DrizzleDriver } from '@rbac-node/drizzle';
-import { defineRbacSchema } from '@rbac-node/drizzle/schema/mysql';
+import { DrizzleDriver } from '@rbac-ts/drizzle';
+import { defineRbacSchema } from '@rbac-ts/drizzle/schema/mysql';
 
 const rbac = defineRbacSchema();
 const connection = await mysql.createConnection(process.env.DATABASE_URL!);
@@ -65,8 +65,8 @@ const driver = new DrizzleDriver(db, rbac);
 ```ts
 import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
-import { DrizzleDriver } from '@rbac-node/drizzle';
-import { defineRbacSchema } from '@rbac-node/drizzle/schema/sqlite';
+import { DrizzleDriver } from '@rbac-ts/drizzle';
+import { defineRbacSchema } from '@rbac-ts/drizzle/schema/sqlite';
 
 const sqlite = new Database('app.db');
 sqlite.pragma('foreign_keys = ON'); // required for cascading deletes
@@ -138,9 +138,9 @@ drizzle-kit migrate
 
 ## Testing
 
-`@rbac-node/drizzle` ships a `better-sqlite3` conformance suite as part of its
+`@rbac-ts/drizzle` ships a `better-sqlite3` conformance suite as part of its
 own test runner — see `src/driver.test.ts`. It re-uses
-`runConformanceSuite` from `@rbac-node/core/testing`, so it's the same suite
+`runConformanceSuite` from `@rbac-ts/core/testing`, so it's the same suite
 every driver in the ecosystem runs against. 20/20 tests pass.
 
 ## License

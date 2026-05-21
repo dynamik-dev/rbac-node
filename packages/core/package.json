@@ -1,5 +1,5 @@
 {
-  "name": "@rbac-node/core",
+  "name": "@rbac-ts/core",
   "version": "0.0.1",
   "description": "Core types, Rbac facade, driver contract, in-memory driver, cache, wildcards, framework middleware.",
   "license": "MIT",
@@ -29,6 +29,7 @@
     "build": "tsc -p tsconfig.build.json",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist .turbo"
   },
@@ -49,6 +50,7 @@
     "vitest": "^2.1.8"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   }
 }

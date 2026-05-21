@@ -34,6 +34,17 @@ export class RoleApi<R extends string = string, P extends string = string> {
     return role;
   }
 
+  /**
+   * Bulk, idempotent role creation. Returns one role per unique input name,
+   * creating missing ones in a single round trip. Does not attach permissions
+   * — use {@link RoleApi.givePermissions} or {@link RoleApi.syncPermissions}
+   * afterwards if you need to wire them up.
+   */
+  async createMany(names: ReadonlyArray<R>): Promise<Role[]> {
+    if (names.length === 0) return [];
+    return this.ctx.driver.createRoles(names);
+  }
+
   async findByName(name: R): Promise<Role | null> {
     return this.ctx.driver.findRoleByName(name);
   }

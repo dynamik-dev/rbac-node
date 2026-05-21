@@ -6,7 +6,7 @@ import {
   type RoleName,
   type Subject,
   UnauthorizedError,
-} from '@rbac-node/core';
+} from '@rbac-ts/core';
 
 type Awaitable<T> = T | Promise<T>;
 

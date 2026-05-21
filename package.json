@@ -1,5 +1,5 @@
 {
-  "name": "rbac-node",
+  "name": "rbac-ts",
   "private": true,
   "version": "0.0.0",
   "description": "Type-safe RBAC for Node — feature parity with spatie/laravel-permission",
@@ -13,19 +13,26 @@
   "scripts": {
     "build": "turbo run build",
     "test": "turbo run test",
+    "test:coverage": "turbo run test:coverage",
     "typecheck": "turbo run typecheck",
     "lint": "pnpm lint:fmt && pnpm lint:js && pnpm lint:deps",
     "lint:fmt": "biome format .",
     "lint:js": "biome lint .",
     "lint:deps": "depcruise packages",
     "fix": "biome check --write .",
-    "clean": "turbo run clean && rm -rf node_modules"
+    "clean": "turbo run clean && rm -rf node_modules",
+    "prepare": "lefthook install",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "turbo run build --filter='./packages/*' && changeset publish"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",
     "@changesets/cli": "^2.27.10",
     "@types/node": "^22.10.5",
+    "@vitest/coverage-v8": "2.1.9",
     "dependency-cruiser": "^17.4.0",
+    "lefthook": "^2.1.8",
     "turbo": "^2.3.4",
     "typescript": "^5.7.3"
   },
@@ -35,6 +42,7 @@
       "@prisma/engines",
       "better-sqlite3",
       "esbuild",
+      "lefthook",
       "prisma"
     ]
   }

@@ -1,0 +1,48 @@
+name: Changesets
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: changesets-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Version PR or publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # changesets/action needs:
+    #   contents: write     → push the Version Packages PR branch and tags
+    #   pull-requests: write→ open/update the PR
+    #   id-token: write     → mint OIDC tokens for npm provenance
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup
+
+      - name: Build
+        run: pnpm build
+
+      - name: Create release PR or publish
+        uses: changesets/action@v1
+        with:
+          # When pending changesets exist on main, open/update a "Version
+          # Packages" PR. When the PR merges (no pending changesets),
+          # run `pnpm release` to publish to npm.
+          version: pnpm version-packages
+          publish: pnpm release
+          commit: "chore: version packages"
+          title: "chore: version packages"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "true"

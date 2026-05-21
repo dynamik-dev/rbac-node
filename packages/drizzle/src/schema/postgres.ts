@@ -9,7 +9,7 @@ import {
 } from 'drizzle-orm/pg-core';
 
 /**
- * Postgres schema bundle for `@rbac-node/drizzle`.
+ * Postgres schema bundle for `@rbac-ts/drizzle`.
  *
  * Tables follow Spatie's `laravel-permission` column naming so a Laravel-side
  * data migration is straightforward.

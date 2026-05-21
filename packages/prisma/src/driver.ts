@@ -9,8 +9,8 @@ import type {
   RoleFilter,
   RoleId,
   Subject,
-} from '@rbac-node/core';
-import { toPermissionId, toRoleId } from '@rbac-node/core';
+} from '@rbac-ts/core';
+import { toPermissionId, toRoleId } from '@rbac-ts/core';
 
 // ─── Structural client typing ───────────────────────────────────────────────
 //
@@ -115,6 +115,46 @@ export class PrismaDriver implements RbacDriver {
     return rowToPermission(row);
   }
 
+  async createPermissions(names: ReadonlyArray<string>): Promise<Permission[]> {
+    if (names.length === 0) return [];
+    const uniqueNames: string[] = [];
+    const seen = new Set<string>();
+    for (const name of names) {
+      if (seen.has(name)) continue;
+      seen.add(name);
+      uniqueNames.push(name);
+    }
+    return this.db.$transaction(async (tx) => {
+      const existing = (await tx.permission.findMany({
+        where: { name: { in: uniqueNames } },
+      })) as PermissionRow[];
+      const existingByName = new Map(existing.map((row) => [row.name, row]));
+      const missing = uniqueNames.filter((name) => !existingByName.has(name));
+      if (missing.length > 0) {
+        // `createMany` here is the single-round-trip insert. We deliberately
+        // omit `skipDuplicates`: Prisma rejects the flag on SQLite (see the
+        // analogous comment on `giveRolePermissions`). The enclosing
+        // `$transaction` plus the just-performed `findMany` collapse the race
+        // window for any caller using the same client; cross-process races
+        // would surface as a unique-violation here, which is the same failure
+        // mode `createPermission` already has.
+        await tx.permission.createMany({
+          data: missing.map((name) => ({ name })),
+        });
+        const inserted = (await tx.permission.findMany({
+          where: { name: { in: missing } },
+        })) as PermissionRow[];
+        for (const row of inserted) existingByName.set(row.name, row);
+      }
+      const out: Permission[] = [];
+      for (const name of uniqueNames) {
+        const row = existingByName.get(name);
+        if (row) out.push(rowToPermission(row));
+      }
+      return out;
+    });
+  }
+
   async findPermissionByName(name: string): Promise<Permission | null> {
     const row = (await this.db.permission.findFirst({
       where: { name },
@@ -150,6 +190,40 @@ export class PrismaDriver implements RbacDriver {
       data: { name: input.name },
     })) as RoleRow;
     return rowToRole(row);
+  }
+
+  async createRoles(names: ReadonlyArray<string>): Promise<Role[]> {
+    if (names.length === 0) return [];
+    const uniqueNames: string[] = [];
+    const seen = new Set<string>();
+    for (const name of names) {
+      if (seen.has(name)) continue;
+      seen.add(name);
+      uniqueNames.push(name);
+    }
+    return this.db.$transaction(async (tx) => {
+      const existing = (await tx.role.findMany({
+        where: { name: { in: uniqueNames } },
+      })) as RoleRow[];
+      const existingByName = new Map(existing.map((row) => [row.name, row]));
+      const missing = uniqueNames.filter((name) => !existingByName.has(name));
+      if (missing.length > 0) {
+        // See `createPermissions` for why `skipDuplicates` is omitted.
+        await tx.role.createMany({
+          data: missing.map((name) => ({ name })),
+        });
+        const inserted = (await tx.role.findMany({
+          where: { name: { in: missing } },
+        })) as RoleRow[];
+        for (const row of inserted) existingByName.set(row.name, row);
+      }
+      const out: Role[] = [];
+      for (const name of uniqueNames) {
+        const row = existingByName.get(name);
+        if (row) out.push(rowToRole(row));
+      }
+      return out;
+    });
   }
 
   async findRoleByName(name: string): Promise<Role | null> {

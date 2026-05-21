@@ -13,14 +13,14 @@ import {
   type Subject,
   toPermissionId,
   toRoleId,
-} from '@rbac-node/core';
+} from '@rbac-ts/core';
 import { and, type Column, eq, inArray, type SQL, sql, type Table } from 'drizzle-orm';
 
 // ─── Structural types ─────────────────────────────────────────────────────────
 
 /**
  * Tables required by {@link DrizzleDriver}. Returned by `defineRbacSchema` from
- * any of `@rbac-node/drizzle/schema/{postgres,mysql,sqlite}` — those three
+ * any of `@rbac-ts/drizzle/schema/{postgres,mysql,sqlite}` — those three
  * helpers all yield this same shape (dialect-branded at the column level).
  *
  * The column types are intentionally widened to the cross-dialect base
@@ -130,7 +130,7 @@ export interface DrizzleDriverOptions {
  * Drizzle-backed {@link RbacDriver}.
  *
  * Pass a Drizzle database (any dialect) and the table bundle returned by
- * `defineRbacSchema` (from `@rbac-node/drizzle/schema/{postgres,mysql,sqlite}`).
+ * `defineRbacSchema` (from `@rbac-ts/drizzle/schema/{postgres,mysql,sqlite}`).
  *
  * Storage notes:
  * - `permissions.id` / `roles.id` are generated with `crypto.randomUUID()` by
@@ -165,6 +165,54 @@ export class DrizzleDriver implements RbacDriver {
       createdAt: now,
       updatedAt: now,
     };
+  }
+
+  async createPermissions(names: ReadonlyArray<string>): Promise<Permission[]> {
+    if (names.length === 0) return [];
+    const deduped: string[] = [];
+    const seen = new Set<string>();
+    for (const n of names) {
+      if (seen.has(n)) continue;
+      seen.add(n);
+      deduped.push(n);
+    }
+    const t = this.tables.permissions;
+    // See `syncRolePermissions` — we avoid `db.transaction` for cross-dialect
+    // portability. The fetch + `onConflictDoNothing` insert is safe to interleave:
+    // a racing writer can only insert rows we'd also see on the post-fetch read.
+    const existingRows = (await this.db.select().from(t).where(inArray(t.name, deduped))) as Array<
+      Record<string, unknown>
+    >;
+    const existingByName = new Map<string, Permission>();
+    for (const row of existingRows) {
+      const p = this.permissionFromRow(row);
+      existingByName.set(p.name, p);
+    }
+    const missing = deduped.filter((n) => !existingByName.has(n));
+    const insertedByName = new Map<string, Permission>();
+    if (missing.length > 0) {
+      const now = new Date();
+      const insertRows = missing.map((name) => ({
+        id: this.idGen(),
+        name,
+        createdAt: now,
+        updatedAt: now,
+      }));
+      await this.db.insert(t).values(insertRows).onConflictDoNothing();
+      const insertedRows = (await this.db
+        .select()
+        .from(t)
+        .where(inArray(t.name, missing))) as Array<Record<string, unknown>>;
+      for (const row of insertedRows) {
+        const p = this.permissionFromRow(row);
+        insertedByName.set(p.name, p);
+      }
+    }
+    return deduped.map((n) => {
+      const found = existingByName.get(n) ?? insertedByName.get(n);
+      if (!found) throw new Error(`createPermissions: row for "${n}" not found after insert`);
+      return found;
+    });
   }
 
   async findPermissionByName(name: string): Promise<Permission | null> {
@@ -224,6 +272,54 @@ export class DrizzleDriver implements RbacDriver {
       createdAt: now,
       updatedAt: now,
     };
+  }
+
+  async createRoles(names: ReadonlyArray<string>): Promise<Role[]> {
+    if (names.length === 0) return [];
+    const deduped: string[] = [];
+    const seen = new Set<string>();
+    for (const n of names) {
+      if (seen.has(n)) continue;
+      seen.add(n);
+      deduped.push(n);
+    }
+    const t = this.tables.roles;
+    // See `syncRolePermissions` — we avoid `db.transaction` for cross-dialect
+    // portability. The fetch + `onConflictDoNothing` insert is safe to interleave:
+    // a racing writer can only insert rows we'd also see on the post-fetch read.
+    const existingRows = (await this.db.select().from(t).where(inArray(t.name, deduped))) as Array<
+      Record<string, unknown>
+    >;
+    const existingByName = new Map<string, Role>();
+    for (const row of existingRows) {
+      const r = this.roleFromRow(row);
+      existingByName.set(r.name, r);
+    }
+    const missing = deduped.filter((n) => !existingByName.has(n));
+    const insertedByName = new Map<string, Role>();
+    if (missing.length > 0) {
+      const now = new Date();
+      const insertRows = missing.map((name) => ({
+        id: this.idGen(),
+        name,
+        createdAt: now,
+        updatedAt: now,
+      }));
+      await this.db.insert(t).values(insertRows).onConflictDoNothing();
+      const insertedRows = (await this.db
+        .select()
+        .from(t)
+        .where(inArray(t.name, missing))) as Array<Record<string, unknown>>;
+      for (const row of insertedRows) {
+        const r = this.roleFromRow(row);
+        insertedByName.set(r.name, r);
+      }
+    }
+    return deduped.map((n) => {
+      const found = existingByName.get(n) ?? insertedByName.get(n);
+      if (!found) throw new Error(`createRoles: row for "${n}" not found after insert`);
+      return found;
+    });
   }
 
   async findRoleByName(name: string): Promise<Role | null> {

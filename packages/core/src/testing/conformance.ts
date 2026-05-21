@@ -13,7 +13,7 @@ import type { Subject } from '../types.js';
  * Usage from a driver package:
  *
  * ```ts
- * import { runConformanceSuite } from '@rbac-node/core/testing';
+ * import { runConformanceSuite } from '@rbac-ts/core/testing';
  * import { MyDriver } from '../src/driver.js';
  *
  * runConformanceSuite({
@@ -86,6 +86,36 @@ export function runConformanceSuite(options: RunConformanceOptions): void {
         expect(await driver.getRolePermissions(r.id)).toEqual([]);
         expect(await driver.getDirectSubjectPermissions(userSubject('1'))).toEqual([]);
       });
+
+      describe('createPermissions (bulk)', () => {
+        it('creates all when none exist', async () => {
+          const result = await driver.createPermissions(['a', 'b', 'c']);
+          expect(result.map((p) => p.name)).toEqual(['a', 'b', 'c']);
+          expect((await driver.listPermissions()).length).toBe(3);
+        });
+
+        it('is idempotent: existing names are returned, not recreated', async () => {
+          const first = await driver.createPermissions(['a', 'b']);
+          const second = await driver.createPermissions(['a', 'b', 'c']);
+          expect(second.map((p) => p.name)).toEqual(['a', 'b', 'c']);
+          // 'a' and 'b' keep their original ids
+          const aId = first.find((p) => p.name === 'a')?.id;
+          const bId = first.find((p) => p.name === 'b')?.id;
+          expect(second.find((p) => p.name === 'a')?.id).toBe(aId);
+          expect(second.find((p) => p.name === 'b')?.id).toBe(bId);
+          expect((await driver.listPermissions()).length).toBe(3);
+        });
+
+        it('deduplicates input', async () => {
+          const result = await driver.createPermissions(['a', 'a', 'b', 'a']);
+          expect(result.map((p) => p.name)).toEqual(['a', 'b']);
+          expect((await driver.listPermissions()).length).toBe(2);
+        });
+
+        it('returns empty array for empty input', async () => {
+          expect(await driver.createPermissions([])).toEqual([]);
+        });
+      });
     });
 
     describe('roles', () => {
@@ -111,6 +141,33 @@ export function runConformanceSuite(options: RunConformanceOptions): void {
         expect(await driver.getSubjectRoles(userSubject('1'))).toEqual([]);
         // role itself is gone
         expect(await driver.findRoleById(r.id)).toBeNull();
+      });
+
+      describe('createRoles (bulk)', () => {
+        it('creates all when none exist', async () => {
+          const result = await driver.createRoles(['admin', 'editor', 'viewer']);
+          expect(result.map((r) => r.name)).toEqual(['admin', 'editor', 'viewer']);
+          expect((await driver.listRoles()).length).toBe(3);
+        });
+
+        it('is idempotent: existing names are returned, not recreated', async () => {
+          const first = await driver.createRoles(['admin', 'editor']);
+          const second = await driver.createRoles(['admin', 'editor', 'viewer']);
+          expect(second.map((r) => r.name)).toEqual(['admin', 'editor', 'viewer']);
+          const adminId = first.find((r) => r.name === 'admin')?.id;
+          expect(second.find((r) => r.name === 'admin')?.id).toBe(adminId);
+          expect((await driver.listRoles()).length).toBe(3);
+        });
+
+        it('deduplicates input', async () => {
+          const result = await driver.createRoles(['admin', 'admin', 'editor']);
+          expect(result.map((r) => r.name)).toEqual(['admin', 'editor']);
+          expect((await driver.listRoles()).length).toBe(2);
+        });
+
+        it('returns empty array for empty input', async () => {
+          expect(await driver.createRoles([])).toEqual([]);
+        });
       });
     });
 
@@ -232,6 +289,27 @@ export function runConformanceSuite(options: RunConformanceOptions): void {
         expect(await rbac.for(subject).hasRole('editor')).toBe(true);
         expect((await rbac.for(subject).getPermissionNames()).sort()).toEqual(['a', 'b']);
         expect(role.id).toBeTruthy();
+      });
+
+      it('permissions.createMany + roles.createMany are bulk and idempotent', async () => {
+        const rbac = new Rbac({ driver });
+
+        const perms = await rbac.permissions.createMany(['a', 'b', 'c']);
+        expect(perms.map((p) => p.name)).toEqual(['a', 'b', 'c']);
+
+        const reAdded = await rbac.permissions.createMany(['b', 'c', 'd']);
+        expect(reAdded.map((p) => p.name)).toEqual(['b', 'c', 'd']);
+        expect((await rbac.permissions.list()).length).toBe(4);
+
+        // empty input is a no-op
+        expect(await rbac.permissions.createMany([])).toEqual([]);
+
+        const roles = await rbac.roles.createMany(['admin', 'editor']);
+        expect(roles.map((r) => r.name)).toEqual(['admin', 'editor']);
+        const reAddedRoles = await rbac.roles.createMany(['editor', 'viewer']);
+        expect(reAddedRoles.map((r) => r.name)).toEqual(['editor', 'viewer']);
+        expect((await rbac.roles.list()).length).toBe(3);
+        expect(await rbac.roles.createMany([])).toEqual([]);
       });
 
       it('wildcard permissions match', async () => {
